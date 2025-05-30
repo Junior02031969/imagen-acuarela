@@ -1,0 +1,33 @@
+!pip install opencv-python-headless
+
+import cv2
+import matplotlib.pyplot as plt
+from google.colab import files
+import numpy as np
+
+uploaded = files.upload()
+
+for fname in uploaded.keys():
+    img = cv2.imread(fname)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+smile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_smile.xml")
+
+faces = face_cascade.detectMultiScale(img_gray, scaleFactor=1.3, minNeighbors=5)
+
+for (x, y, w, h) in faces:
+    cv2.rectangle(img_rgb, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    roi_gray = img_gray[y:y+h, x:x+w]
+    roi_color = img_rgb[y:y+h, x:x+w]
+
+    smiles = smile_cascade.detectMultiScale(roi_gray, scaleFactor=1.7, minNeighbors=20)
+    for (sx, sy, sw, sh) in smiles:
+        cv2.rectangle(roi_color, (sx, sy), (sx+sw, sy+sh), (0, 255, 0), 2)
+
+plt.figure(figsize=(8, 6))
+plt.imshow(img_rgb)
+plt.title("Detección de Rostro y Sonrisa")
+plt.axis("off")
+plt.show()
